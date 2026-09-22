@@ -1,0 +1,29 @@
+{
+  "name": "gtc-todo",
+  "version": "1.0.0",
+  "description": "个人专属待办桌面应用（番茄计时 / 待办 / 秒表 / 日历），离线、本地存储",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "pack:portable": "node scripts/portable.js",
+    "test": "node test/all.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.gtc.todo",
+    "productName": "我的待办",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>桌面胶囊</title>
+  <link rel="stylesheet" href="css/capsule.css" />
+</head>
+<body>
+  <div class="wrap" id="wrap">
+    <div class="capsule" id="capsule">
+      <span class="cap-icon" id="cap-icon">🍅</span>
+      <span class="cap-body">
+        <span class="cap-text" id="cap-text">我的待办</span>
+        <span class="cap-hint" id="cap-hint">点击展开</span>
+      </span>
+      <span class="cap-arrow">›</span>
+    </div>
+
+    <section class="panel" id="panel" aria-hidden="true">
+      <div class="panel-head">
+        <span class="panel-title">系统资源</span>
+        <button class="panel-pin" id="panel-pin" type="button">钉住</button>
+      </div>
+
+      <div class="p-row">
+        <div class="p-line">
+          <span class="p-name">CPU</span>
+          <span class="p-value" id="p-cpu">--</span>
+        </div>
+        <div class="p-bar"><i id="p-cpu-bar" data-level="ok"></i></div>
+      </div>
+
+      <div class="p-row">
+        <div class="p-line">
+          <span class="p-name">内存</span>
+          <span class="p-value" id="p-mem">--</span>
+        </div>
+        <div class="p-bar"><i id="p-mem-bar" data-level="ok"></i></div>
+        <div class="p-sub" id="p-mem-sub">--</div>
+      </div>
+
+      <div class="p-sep"></div>
+      <div class="panel-title p-sub-title">磁盘</div>
+      <div class="p-disks" id="p-disks"></div>
+    </section>
+  </div>
+
+  <script src="../capsule-math.js"></script>
+  <script src="../sysinfo-format.js"></script>
+  <script src="js/capsule-ui.js"></script>
+</body>
+</html>
