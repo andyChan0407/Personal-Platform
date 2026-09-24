@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>应用占用弹层预览（真实样式）</title>
+  <link rel="stylesheet" href="../src/renderer/css/capsule.css" />
+  <style>
+    body { background: #EFF3F9; display: flex; align-items: flex-start; justify-content: center; padding: 40px; }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="wrap" style="background:transparent;">
+    <section class="proc-popup open" id="proc-popup" aria-hidden="false">
+      <div class="pop-head">
+        <span class="pop-caret">⌃</span>
+        <span class="pop-tot pop-tot-cpu" id="pop-cpu-total">14.0%</span>
+        <span class="pop-tot pop-tot-mem" id="pop-mem-total">2,506.8 M</span>
+      </div>
+      <div class="pop-cols">
+        <span class="pop-col pop-col-name">名称</span>
+        <span class="pop-col pop-col-status">状态</span>
+        <span class="pop-col pop-col-cpu">CPU</span>
+        <span class="pop-col pop-col-mem">内存</span>
+      </div>
+      <div class="pop-group" id="pop-group">应用 (11)</div>
+      <div class="pop-apps" id="pop-apps">
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#1AAD19">微</span><span class="pop-name">微信</span></span><span class="pop-status st-run">运行中</span><span class="pop-cpu">10.5%</span><span class="pop-mem">1,726.8 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#F4B400">C</span><span class="pop-name">Chrome</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">3.2%</span><span class="pop-mem">600.0 M</span></div>
+        <div class="pop-app is-self"><span class="pop-name-cell"><span class="pop-ic" style="background:#4789FE">E</span><span class="pop-name">Electron</span></span><span class="pop-status st-run">运行中</span><span class="pop-cpu">0%</span><span class="pop-mem">180.0 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#7C4DFF">M</span><span class="pop-name">MindMaster</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0%</span><span class="pop-mem">120.0 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#2F88FF">邮</span><span class="pop-name">腾讯企业邮</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0.3%</span><span class="pop-mem">95.0 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#7A8A99">文</span><span class="pop-name">Windows 资源管理器</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0.1%</span><span class="pop-mem">90.0 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#E8412C">W</span><span class="pop-name">WPS Office</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0%</span><span class="pop-mem">80.0 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:hsl(120 62% 50%)">W</span><span class="pop-name">WXWork</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0%</span><span class="pop-mem">60.0 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#9AA1AC">任</span><span class="pop-name">任务管理器</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">1.0%</span><span class="pop-mem">40.0 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#FF7A1A">3</span><span class="pop-name">360压缩</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0%</span><span class="pop-mem">25.0 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#3AA0F0">V</span><span class="pop-name">Visual Studio Code</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0%</span><span class="pop-mem">15.0 M</span></div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

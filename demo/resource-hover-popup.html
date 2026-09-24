@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>系统资源面板 · 悬停应用占用弹层</title>
+<style>
+  /* ============================================================
+     基础
+     ============================================================ */
+  :root{
+    --ink:#1F2A37;
+    --ink-2:#6B7280;
+    --muted:#9AA1AC;
+    --line:rgba(16,32,56,.10);
+    --track:#EDEFF4;
+    --accent-1:#FF855F;
+    --accent-2:#E2553B;
+    --ok:#378ADD;
+    --warn:#EF9F27;
+    --danger:#E24B4A;
+    --danger-ink:#A32D2D;
+    --shade:#F4F6F8;
+    --shade-alt:#EEF1F5;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1100px 560px at 14% -12%, #f7f8fb 0%, #eceff4 44%, #e3e7ee 100%);
+    user-select:none;
+  }
+
+  /* 桌面场景：把胶囊 + 面板摆在左上角附近 */
+  .stage{
+    position:relative;
+    min-height:100vh;
+    padding:40px 28px 96px;
+    display:flex;
+    justify-content:flex-start;
+  }
+  .wrap{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    align-items:flex-start;
+  }
+
+  /* ============================================================
+     胶囊（复刻 capsule.css）
+     ============================================================ */
+  .capsule{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    height:44px;
+    width:172px;
+    padding:0 14px 0 12px;
+    border-radius:999px;
+    color:#fff;
+    background:linear-gradient(135deg,var(--accent-1) 0%,var(--accent-2) 100%);
+    box-shadow:
+      0 10px 24px -10px rgba(226,85,59,.65),
+      0 2px 6px rgba(16,32,56,.18),
+      inset 0 1px 0 rgba(255,255,255,.35);
+    transition:transform 200ms cubic-bezier(.22,.61,.36,1), box-shadow 200ms cubic-bezier(.22,.61,.36,1);
+  }
+  .capsule:hover{
+    transform:translateY(-1px) scale(1.02);
+    box-shadow:
+      0 14px 30px -10px rgba(226,85,59,.75),
+      0 2px 6px rgba(16,32,56,.2),
+      inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .cap-icon{
+    width:26px;height:26px;flex:none;
+    display:grid;place-items:center;
+    font-size:15px;line-height:1;
+    border-radius:50%;
+    background:rgba(255,255,255,.22);
+  }
+  .cap-body{ display:flex;flex-direction:column;line-height:1.15;min-width:0; }
+  .cap-text{ font-size:12.5px;font-weight:600;letter-spacing:.3px;white-space:nowrap; }
+  .cap-hint{ font-size:9.5px;opacity:.72;white-space:nowrap; }
+  .cap-arrow{ margin-left:auto;font-size:15px;line-height:1;opacity:.8; }
+
+  /* ============================================================
+     资源面板（复刻 capsule.css，含磁盘区）
+     ============================================================ */
+  .panel{
+    width:300px;
+    padding:11px 12px 12px;
+    border-radius:12px;
+    background:#fff;
+    color:var(--ink);
+    border:1px solid var(--line);
+    box-shadow:
+      0 14px 30px -14px rgba(16,32,56,.45),
+      0 2px 8px rgba(16,32,56,.12);
+  }
+  .panel-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:9px;
+  }
+  .panel-title{ font-size:11px;color:var(--ink-2);letter-spacing:.4px; }
+  .panel-pin{
+    font:inherit;font-size:10px;line-height:1;
+    padding:4px 8px;border-radius:999px;
+    border:1px solid rgba(16,32,56,.16);
+    background:transparent;color:var(--ink-2);
+    display:inline-flex;align-items:center;gap:4px;
+    cursor:pointer;
+  }
+  .panel-pin svg{ display:block; }
+  .panel-pin:hover{ border-color:rgba(16,32,56,.3);color:var(--ink); }
+
+  .p-row{ margin-bottom:11px; }
+  .p-line{ display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px; }
+  .p-name{ font-size:11.5px;color:var(--ink-2); }
+  .p-value{ font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums; }
+  .p-value .hot{ color:var(--accent-2); font-weight:600; }
+
+  .p-bar{ height:4px;border-radius:2px;background:var(--track);overflow:hidden; }
+  .p-bar > i{
+    display:block;height:100%;width:0;border-radius:2px;
+    background:var(--ok);
+    transition:width 260ms cubic-bezier(.22,.61,.36,1), background-color 200ms linear;
+  }
+  .p-bar > i[data-level="warn"]{ background:var(--warn); }
+  .p-bar > i[data-level="danger"]{ background:var(--danger); }
+
+  .p-sub{ margin-top:4px;text-align:right;font-size:10.5px;color:var(--muted); }
+  .p-sep{ height:1px;background:rgba(16,32,56,.08);margin:0 0 9px; }
+  .p-sub-title{ margin-bottom:6px; }
+
+  .p-disk{ margin-bottom:9px; }
+  .p-disk:last-child{ margin-bottom:0; }
+  .p-disk .p-bar{ height:3px; }
+  .p-disk .p-value.is-danger{ color:var(--danger-ink); }
+
+  /* ---- 悬停触发区：CPU 行 + 内存 行（对应截图红框） ---- */
+  .trigger{
+    position:relative;
+    border-radius:9px;
+    padding:2px 6px 1px;
+    margin:0 -6px 11px;
+    transition:background-color 180ms ease;
+  }
+  .trigger::after{           /* 悬停时给一点极轻的提示，不改变原视觉 */
+    content:"";
+    position:absolute;inset:0;
+    border-radius:9px;
+    background:transparent;
+    transition:background-color 180ms ease;
+    pointer-events:none;
+  }
+  .trigger:hover::after,
+  .trigger.active::after{ background:rgba(226,85,59,.06); }
+  .trigger .p-row:last-child{ margin-bottom:0; }
+
+  /* ============================================================
+     悬停弹层（复刻图2：任务管理器「应用」占用列表）
+     ============================================================ */
+  .popup{
+    position:fixed;
+    left:0; top:0;
+    z-index:60;
+    width:428px;
+    max-width:calc(100vw - 24px);
+    max-height:calc(100vh - 24px);
+    overflow:hidden;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    box-shadow:
+      0 18px 44px -16px rgba(16,32,56,.42),
+      0 3px 10px rgba(16,32,56,.14);
+    padding:9px 0 7px;
+    opacity:0;
+    transform:translateY(5px) scale(.975);
+    transform-origin:var(--pop-origin, top left);
+    transition:opacity 180ms ease, transform 200ms cubic-bezier(.22,.61,.36,1);
+    pointer-events:none;
+    will-change:opacity, transform, left, top;
+  }
+  .popup.show{ opacity:1;transform:translateY(0) scale(1);pointer-events:auto; }
+
+  .prow{
+    display:grid;
+    grid-template-columns:1fr 78px 56px 92px;
+    align-items:center;
+  }
+  .prow > *{ min-width:0; padding:0 10px; }
+
+  /* 顶部：折叠箭头 + 两列合计 */
+  .pop-head{ height:22px; }
+  .pop-head .pop-collapse{ display:flex;align-items:center;padding-left:12px; }
+  .pop-roll{
+    font-size:11px;color:var(--ink-2);text-align:right;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* 列名 */
+  .pop-cols{ height:26px;border-bottom:1px solid rgba(16,32,56,.07); }
+  .pop-cols > span{ font-size:11px;color:var(--ink-2); }
+  .pop-cols .pop-cpu-h,.pop-cols .pop-mem-h{ text-align:right; }
+
+  /* CPU / 内存 两列的浅灰竖带 */
+  .shade{ background:var(--shade); }
+  .shade.alt{ background:var(--shade-alt); }
+  .pop-head .shade{ height:22px;display:flex;align-items:center;justify-content:flex-end; }
+  .pop-cols .shade{ height:26px;display:flex;align-items:center;justify-content:flex-end; }
+
+  /* 分组标题 */
+  .pop-group{
+    display:block;
+    padding:9px 12px 6px;
+    font-size:12px;font-weight:600;color:var(--ink);
+    letter-spacing:.2px;
+  }
+
+  /* 应用行 */
+  .pop-app{ height:30px; }
+  .pop-app .pop-name{
+    display:flex;align-items:center;gap:7px;
+    font-size:11.5px;color:var(--ink);
+    overflow:hidden;white-space:nowrap;
+  }
+  .pop-app .pop-name .txt{ overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+  .pop-chev{
+    flex:none;width:10px;height:10px;color:#B7BEC7;
+    transition:transform 160ms ease;
+  }
+  .pop-app:hover .pop-chev{ transform:translateX(1px);color:#8A929C; }
+
+  .ico{
+    flex:none;width:16px;height:16px;border-radius:4px;
+    display:grid;place-items:center;
+    color:#fff;font-size:9px;font-weight:700;line-height:1;
+    font-family:"Segoe UI",sans-serif;
+  }
+  .ico.round{ border-radius:50%; }
+
+  .pop-status{
+    font-size:10.5px;color:#2E7D32;
+    display:flex;align-items:center;gap:4px;justify-content:flex-start;
+    white-space:nowrap;overflow:hidden;
+  }
+  .pop-status .leaf{ flex:none; }
+
+  .pop-cpu,.pop-mem{
+    font-size:11.5px;color:var(--ink);text-align:right;
+    font-variant-numeric:tabular-nums;
+    display:flex;align-items:center;justify-content:flex-end;
+  }
+  .pop-mem .val{ overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+  .pop-cpu.zero,.pop-mem.zero{ color:#8A929C; }
+
+  .pop-app{ transition:background-color 120ms ease; }
+  .pop-app:hover .pop-name,
+  .pop-app:hover .pop-status,
+  .pop-app:hover .pop-cpu,
+  .pop-app:hover .pop-mem{ background-color:#EDF1F6; }
+  .pop-app:hover .shade{ background-color:#E7ECF3; }
+
+  /* 底部提示 */
+  .hint{
+    margin:22px 0 0 2px;
+    font-size:12px;color:#8A929C;line-height:1.7;
+  }
+  .hint b{ color:var(--accent-2); }
+
+  /* 响应式：窄屏收窄面板与弹层，并让弹层改为满宽贴合 */
+  @media (max-width:600px){
+    .stage{ padding:24px 16px 72px; }
+    .panel{ width:264px; }
+    .popup{ width:min(340px, calc(100vw - 20px)); }
+    .prow{ grid-template-columns:1fr 62px 48px 74px; }
+    .prow > *{ padding:0 8px; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="wrap">
+      <!-- 胶囊 -->
+      <div class="capsule">
+        <span class="cap-icon">🍅</span>
+        <span class="cap-body">
+          <span class="cap-text">我的待办</span>
+          <span class="cap-hint">点击展开</span>
+        </span>
+        <span class="cap-arrow">›</span>
+      </div>
+
+      <!-- 系统资源面板 -->
+      <section class="panel" aria-label="系统资源">
+        <div class="panel-head">
+          <span class="panel-title">系统资源</span>
+          <button class="panel-pin" type="button">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M14 3l7 7-3 1-4 4-1 4-3-3-4 4-1-1 4-4-3-3 4-1 4-4 1-3z"
+                    stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            </svg>
+            钉住
+          </button>
+        </div>
+
+        <!-- 红框区域 = 悬停触发区 -->
+        <div class="trigger" id="trigger" tabindex="0" aria-describedby="popup">
+          <div class="p-row">
+            <div class="p-line">
+              <span class="p-name">CPU</span>
+              <span class="p-value"><span class="hot">6%</span> · 16 核</span>
+            </div>
+            <div class="p-bar"><i data-level="ok" style="width:6%"></i></div>
+          </div>
+
+          <div class="p-row">
+            <div class="p-line">
+              <span class="p-name">内存</span>
+              <span class="p-value">已用 12.0 G / 共 13.9 G</span>
+            </div>
+            <div class="p-bar"><i data-level="warn" style="width:86%"></i></div>
+            <div class="p-sub">剩余 1.9 G · 13% 可用</div>
+          </div>
+        </div>
+
+        <div class="p-sep"></div>
+        <div class="panel-title p-sub-title">磁盘</div>
+        <div class="p-disks" id="disks"></div>
+      </section>
+
+      <p class="hint">
+        悬停面板中的 <b>CPU / 内存</b> 区域，即可弹出应用级占用清单（任务管理器样式）。
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ 悬停弹层（图2 内容） ============ -->
+  <div class="popup" id="popup" role="dialog" aria-label="应用资源占用">
+
+    <!-- 顶部：折叠箭头 + 列合计 -->
+    <div class="prow pop-head">
+      <span class="pop-collapse">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 15l7-7 7 7" stroke="#9AA1AC" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span></span>
+      <span class="shade pop-roll">10%</span>
+      <span class="shade pop-roll">85%</span>
+    </div>
+
+    <!-- 列名 -->
+    <div class="prow pop-cols">
+      <span>名称</span>
+      <span>状态</span>
+      <span class="shade pop-cpu-h">CPU</span>
+      <span class="shade pop-mem-h">内存</span>
+    </div>
+
+    <!-- 分组 -->
+    <div class="pop-group">应用 (11)</div>
+
+    <!-- 应用行由脚本渲染 -->
+    <div id="apps"></div>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- 磁盘（复刻截图数值与分级） ---------------- */
+  var DISKS = [
+    { letter:'C:', total:'200.1 G', free:'10.8 G', freeText:'5%',  bar:95, level:'danger' },
+    { letter:'D:', total:'137.3 G', free:'22.6 G', freeText:'16%', bar:84, level:'warn'  },
+    { letter:'E:', total:'137.3 G', free:'25.9 G', freeText:'19%', bar:81, level:'warn'  }
+  ];
+
+  var disksEl = document.getElementById('disks');
+  DISKS.forEach(function (d) {
+    var row = document.createElement('div');
+    row.className = 'p-disk';
+
+    var line = document.createElement('div');
+    line.className = 'p-line';
+
+    var name = document.createElement('span');
+    name.className = 'p-name';
+    name.textContent = d.letter;
+
+    var val = document.createElement('span');
+    val.className = 'p-value' + (d.level === 'danger' ? ' is-danger' : '');
+    val.innerHTML = '共 ' + d.total + ' · <span class="hot">剩 ' + d.free + '</span> · ' + d.freeText;
+
+    line.appendChild(name);
+    line.appendChild(val);
+
+    var bar = document.createElement('div');
+    bar.className = 'p-bar';
+    var fill = document.createElement('i');
+    fill.setAttribute('data-level', d.level);
+    fill.style.width = d.bar + '%';
+    bar.appendChild(fill);
+
+    row.appendChild(line);
+    row.appendChild(bar);
+    disksEl.appendChild(row);
+  });
+
+  /* ---------------- 应用占用清单（复刻图2） ---------------- */
+  var APPS = [
+    { name:'360压缩 (32 位)',        cpu:'0%',   mem:'2.0 MB',   icon:{ t:'360', c:'#2FB457' } },
+    { name:'Electron (4)',           cpu:'0.3%', mem:'110.5 MB', icon:{ t:'e',   c:'#2B2E3A' } },
+    { name:'MindMaster (6)',         cpu:'0%',   mem:'51.7 MB',  icon:{ t:'M',   c:'#3AA76D', round:true } },
+    { name:'Weixin (6)',             cpu:'0%',   mem:'265.9 MB', icon:{ t:'微',  c:'#07C160' } },
+    { name:'WeMail (32 位)',         cpu:'0%',   mem:'25.0 MB',  icon:{ t:'✉',   c:'#2F6FED' } },
+    { name:'Windows 资源管理器 (2)', cpu:'1.1%', mem:'128.5 MB', icon:{ folder:true }, status:'效能模式' },
+    { name:'WorkBuddy (25)',         cpu:'0%',   mem:'1,726.8 MB', icon:{ t:'W', c:'#1F9CF0' } },
+    { name:'WPS Office (32 位) (2)', cpu:'0%',   mem:'93.2 MB',  icon:{ t:'W',   c:'#E5503C' } },
+    { name:'WPS Office (32 位) (2)', cpu:'0%',   mem:'141.4 MB', icon:{ t:'W',   c:'#E5503C' } },
+    { name:'WXWork.exe (32 位) (2)', cpu:'0%',   mem:'155.0 MB', icon:{ t:'企',  c:'#2B7DE9' } },
+    { name:'任务管理器',             cpu:'3.2%', mem:'93.7 MB',  icon:{ bars:true } }
+  ];
+
+  var CHEV = '<svg class="pop-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+             '<path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2"' +
+             ' stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  var LEAF = '<svg class="leaf" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+             '<path d="M5 19c9 1 14-4 14-13-9 0-14 4-14 13z" fill="#8BC34A" opacity=".9"/>' +
+             '<path d="M5 19C8 13 12 10 16 8" stroke="#4CAF50" stroke-width="1.4" stroke-linecap="round"/></svg>';
+
+  function iconHTML(ic) {
+    if (!ic) return '';
+    if (ic.folder) {
+      return '<span class="ico" style="background:#F5C13D">' +
+             '<svg width="11" height="11" viewBox="0 0 24 24" fill="none">' +
+             '<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" ' +
+             'fill="#fff"/></svg></span>';
+    }
+    if (ic.bars) {
+      return '<span class="ico" style="background:#0B73CF">' +
+             '<svg width="11" height="11" viewBox="0 0 24 24" fill="#fff">' +
+             '<rect x="4" y="12" width="4" height="8" rx="1"/>' +
+             '<rect x="10" y="7" width="4" height="13" rx="1"/>' +
+             '<rect x="16" y="4" width="4" height="16" rx="1"/></svg></span>';
+    }
+    return '<span class="ico' + (ic.round ? ' round' : '') + '" style="background:' + ic.c + '">' +
+           ic.t + '</span>';
+  }
+
+  var appsEl = document.getElementById('apps');
+  APPS.forEach(function (a) {
+    var row = document.createElement('div');
+    row.className = 'prow pop-app';
+
+    var name = document.createElement('span');
+    name.className = 'pop-name';
+    name.innerHTML = CHEV + iconHTML(a.icon) + '<span class="txt">' + a.name + '</span>';
+
+    var status = document.createElement('span');
+    status.className = 'pop-status';
+    if (a.status) status.innerHTML = a.status + LEAF;
+
+    var cpu = document.createElement('span');
+    cpu.className = 'shade pop-cpu' + (a.cpu === '0%' ? ' zero' : '');
+    cpu.textContent = a.cpu;
+
+    var mem = document.createElement('span');
+    mem.className = 'shade pop-mem' + (a.mem === '2.0 MB' ? ' zero' : '');
+    mem.innerHTML = '<span class="val">' + a.mem + '</span>';
+
+    row.appendChild(name);
+    row.appendChild(status);
+    row.appendChild(cpu);
+    row.appendChild(mem);
+    appsEl.appendChild(row);
+  });
+
+  /* ---------------- 悬停交互 + 智能定位 ---------------- */
+  var trigger = document.getElementById('trigger');
+  var popup = document.getElementById('popup');
+  var hideTimer = null;
+  var GAP = 10;   // 与触发区的间距
+  var PAD = 12;   // 与视口边缘的安全距离
+
+  function place() {
+    var r = trigger.getBoundingClientRect();
+    var pw = popup.offsetWidth;
+    var ph = popup.offsetHeight;
+
+    // 默认：贴在触发区右侧、垂直居中
+    var left = r.right + GAP;
+    var top = r.top + (r.height - ph) / 2;
+    var origin = 'center left';
+
+    // 右侧放不下 → 翻到左侧
+    if (left + pw > window.innerWidth - PAD) {
+      var altLeft = r.left - GAP - pw;
+      if (altLeft >= PAD) {
+        left = altLeft;
+        origin = 'center right';
+      } else {
+        // 两侧都放不下 → 放到下方（或上方），水平对齐触发区
+        left = Math.min(r.left, window.innerWidth - pw - PAD);
+        top = r.bottom + GAP;
+        origin = 'top center';
+        if (top + ph > window.innerHeight - PAD) {
+          top = r.top - GAP - ph;
+          origin = 'bottom center';
+        }
+      }
+    }
+
+    // 统一夹取到视口安全区，避免被裁切/遮挡
+    left = Math.max(PAD, Math.min(left, window.innerWidth - pw - PAD));
+    top = Math.max(PAD, Math.min(top, window.innerHeight - ph - PAD));
+
+    popup.style.left = Math.round(left) + 'px';
+    popup.style.top = Math.round(top) + 'px';
+    popup.style.setProperty('--pop-origin', origin);
+  }
+
+  function show() {
+    if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+    popup.classList.add('show');
+    trigger.classList.add('active');
+    place();
+  }
+  function hide() {
+    if (hideTimer) return;
+    hideTimer = setTimeout(function () {
+      hideTimer = null;
+      popup.classList.remove('show');
+      trigger.classList.remove('active');
+    }, 130); // 宽限期：便于把鼠标从触发区移到弹层上
+  }
+
+  trigger.addEventListener('mouseenter', show);
+  trigger.addEventListener('mouseleave', hide);
+  trigger.addEventListener('focusin', show);
+  trigger.addEventListener('focusout', hide);
+  popup.addEventListener('mouseenter', show);
+  popup.addEventListener('mouseleave', hide);
+
+  window.addEventListener('resize', function () {
+    if (popup.classList.contains('show')) place();
+  });
+  window.addEventListener('scroll', function () {
+    if (popup.classList.contains('show')) place();
+  }, true);
+
+  // 便于自动化/调试
+  window.ResourceHoverPopup = { show: show, hide: hide, place: place };
+
+  // 演示/截图开关：URL 带 ?hover=1 时自动展开弹层
+  if (/[?&]hover=1/.test(window.location.search)) {
+    window.addEventListener('load', function () { setTimeout(show, 60); });
+  }
+})();
+</script>
+</body>
+</html>

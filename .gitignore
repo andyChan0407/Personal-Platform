@@ -1,0 +1,40 @@
+# 依赖
+node_modules/
+
+# 打包产物（所有 dist* 构建目录 + 通用输出）
+dist*/
+out/
+build/
+
+# 压缩包（构建产物，体积大，勿传）
+*.zip
+
+# 临时/探针目录（非项目内容）
+_probe_dir/
+_tmpprobe/
+_ziptest.*
+
+# 本地预览截图
+.preview/
+
+# 本地工具/agent 数据
+.workbuddy/
+.preview/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志
+*.log
+npm-debug.log*
+
+# 编辑器
+.vscode/
+.idea/
+
+# 环境变量（含密钥，切勿提交）
+.env
+.env.local
+*.local

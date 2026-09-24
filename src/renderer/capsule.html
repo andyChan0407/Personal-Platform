@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>桌面胶囊</title>
+  <link rel="stylesheet" href="css/capsule.css" />
+</head>
+<body>
+  <div class="wrap" id="wrap">
+    <div class="capsule" id="capsule">
+      <span class="cap-icon" id="cap-icon">🍅</span>
+      <span class="cap-body">
+        <span class="cap-text" id="cap-text">今日毕</span>
+        <span class="cap-hint" id="cap-hint">点击展开</span>
+      </span>
+      <span class="cap-arrow">›</span>
+    </div>
+
+    <section class="panel" id="panel" aria-hidden="true">
+      <div class="panel-head">
+        <span class="panel-title">系统资源</span>
+        <button class="panel-pin" id="panel-pin" type="button">钉住</button>
+      </div>
+
+      <div class="proc-trigger" id="proc-trigger" aria-label="悬停查看各应用占用">
+        <div class="p-row">
+          <div class="p-line">
+            <span class="p-name">CPU</span>
+            <span class="p-value" id="p-cpu">--</span>
+          </div>
+          <div class="p-bar"><i id="p-cpu-bar" data-level="ok"></i></div>
+        </div>
+
+        <div class="p-row">
+          <div class="p-line">
+            <span class="p-name">内存</span>
+            <span class="p-value" id="p-mem">--</span>
+          </div>
+          <div class="p-bar"><i id="p-mem-bar" data-level="ok"></i></div>
+          <div class="p-sub" id="p-mem-sub">--</div>
+        </div>
+      </div>
+
+      <div class="p-sep"></div>
+      <div class="panel-title p-sub-title">磁盘</div>
+      <div class="p-disks" id="p-disks"></div>
+    </section>
+
+    <section class="proc-popup" id="proc-popup" aria-hidden="true">
+      <div class="pop-head">
+        <span class="pop-caret">⌃</span>
+        <span class="pop-tot pop-tot-cpu" id="pop-cpu-total">--</span>
+        <span class="pop-tot pop-tot-mem" id="pop-mem-total">--</span>
+      </div>
+      <div class="pop-cols">
+        <span class="pop-col pop-col-name">名称</span>
+        <span class="pop-col pop-col-status">状态</span>
+        <span class="pop-col pop-col-cpu">CPU</span>
+        <span class="pop-col pop-col-mem">内存</span>
+      </div>
+      <div class="pop-group">
+        <span class="pop-group-label" id="pop-group">应用 (0)</span>
+        <button class="pop-sys-toggle" id="pop-sys-toggle" type="button" aria-pressed="false">含系统进程</button>
+      </div>
+      <div class="pop-apps" id="pop-apps">
+        <div class="pop-loading">读取中…</div>
+      </div>
+    </section>
+  </div>
+
+  <script src="../capsule-math.js"></script>
+  <script src="../sysinfo-format.js"></script>
+  <script src="js/capsule-ui.js"></script>
+</body>
+</html>

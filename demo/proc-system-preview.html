@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../src/renderer/css/capsule.css" />
+<style>
+  body { background: #d9dde3; padding: 24px; display: flex; gap: 40px; align-items: flex-start; height: auto; overflow: visible; }
+  .col { display: flex; flex-direction: column; gap: 8px; }
+  .cap { font-size: 12px; color: #333; font-weight: 600; }
+  /* 预览里让弹层静态可见 */
+  .proc-popup { display: block; position: static; opacity: 1; transform: none; animation: none; }
+</style>
+</head>
+<body>
+  <div class="col">
+    <div class="cap">默认（仅应用）</div>
+    <section class="proc-popup">
+      <div class="pop-head">
+        <span class="pop-caret">⌃</span>
+        <span class="pop-tot pop-tot-cpu">0%</span>
+        <span class="pop-tot pop-tot-mem">4,246.8 M</span>
+      </div>
+      <div class="pop-cols">
+        <span class="pop-col pop-col-name">名称</span>
+        <span class="pop-col pop-col-status">状态</span>
+        <span class="pop-col pop-col-cpu">CPU</span>
+        <span class="pop-col pop-col-mem">内存</span>
+      </div>
+      <div class="pop-group">
+        <span class="pop-group-label">应用 (5)</span>
+        <button class="pop-sys-toggle" aria-pressed="false" type="button">含系统进程</button>
+      </div>
+      <div class="pop-apps">
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#2F88FF">W</span><span class="pop-name">WorkBuddy</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0.0%</span><span class="pop-mem">2,426.8 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#FF7A1A">D</span><span class="pop-name">Doubao</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0.3%</span><span class="pop-mem">1,039.1 M</span></div>
+        <div class="pop-app is-self"><span class="pop-name-cell"><span class="pop-ic" style="background:#E2553B">我</span><span class="pop-name">我的待办</span></span><span class="pop-status st-run">运行中</span><span class="pop-cpu">0.8%</span><span class="pop-mem">785.6 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#7A8A99">W</span><span class="pop-name">Windows 资源管理器</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0.0%</span><span class="pop-mem">703.7 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#1AAD19">微</span><span class="pop-name">微信</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0.1%</span><span class="pop-mem">477.2 M</span></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="col">
+    <div class="cap">含系统进程（标「系统」）</div>
+    <section class="proc-popup">
+      <div class="pop-head">
+        <span class="pop-caret">⌃</span>
+        <span class="pop-tot pop-tot-cpu">0%</span>
+        <span class="pop-tot pop-tot-mem">6,255.7 M</span>
+      </div>
+      <div class="pop-cols">
+        <span class="pop-col pop-col-name">名称</span>
+        <span class="pop-col pop-col-status">状态</span>
+        <span class="pop-col pop-col-cpu">CPU</span>
+        <span class="pop-col pop-col-mem">内存</span>
+      </div>
+      <div class="pop-group">
+        <span class="pop-group-label">应用与系统 (8)</span>
+        <button class="pop-sys-toggle" aria-pressed="true" type="button">隐藏系统进程</button>
+      </div>
+      <div class="pop-apps">
+        <div class="pop-app is-sys"><span class="pop-name-cell"><span class="pop-ic" style="background:#B0894A">M</span><span class="pop-name">内存压缩</span></span><span class="pop-status st-sys">系统</span><span class="pop-cpu">0.0%</span><span class="pop-mem">1,356.5 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#2F88FF">W</span><span class="pop-name">WorkBuddy</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0.0%</span><span class="pop-mem">2,426.8 M</span></div>
+        <div class="pop-app"><span class="pop-name-cell"><span class="pop-ic" style="background:#FF7A1A">D</span><span class="pop-name">Doubao</span></span><span class="pop-status st-bg">后台</span><span class="pop-cpu">0.3%</span><span class="pop-mem">1,039.1 M</span></div>
+        <div class="pop-app is-sys"><span class="pop-name-cell"><span class="pop-ic" style="background:#9AA1AC">W</span><span class="pop-name">Windows 服务主机</span></span><span class="pop-status st-sys">系统</span><span class="pop-cpu">0.0%</span><span class="pop-mem">851.5 M</span></div>
+        <div class="pop-app is-self"><span class="pop-name-cell"><span class="pop-ic" style="background:#E2553B">我</span><span class="pop-name">我的待办</span></span><span class="pop-status st-run">运行中</span><span class="pop-cpu">0.8%</span><span class="pop-mem">785.6 M</span></div>
+        <div class="pop-app is-sys"><span class="pop-name-cell"><span class="pop-ic" style="background:#9AA1AC">M</span><span class="pop-name">MsMpEng</span></span><span class="pop-status st-sys">系统</span><span class="pop-cpu">0.0%</span><span class="pop-mem">324.8 M</span></div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
